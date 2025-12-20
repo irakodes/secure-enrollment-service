@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/users")
 public class UserController {
 
-    @GetMapping(produces = "application/x-protobuf")
+    @GetMapping(produces = "application/octet-stream")
     public UserProto.User getUser() {
         return UserProto.User.newBuilder()
                 .setId(1)
