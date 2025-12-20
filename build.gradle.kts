@@ -62,6 +62,12 @@ dependencies {
     implementation("com.google.protobuf:protobuf-java-util:3.25.1")
     implementation("org.springframework.grpc:spring-grpc-spring-boot-starter")
 
+    implementation("org.bouncycastle:bcprov-jdk18on:1.83")
+    implementation("org.bouncycastle:bcpqc-jdk18on:1.83")
+
+    // For PGP or CMS functionality
+    // implementation 'org.bouncycastle:bcpg-jdk18on:1.81'
+
     compileOnly("org.projectlombok:lombok")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     annotationProcessor("org.projectlombok:lombok")
