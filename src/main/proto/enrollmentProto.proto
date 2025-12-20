@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+option java_package = "online.eracodes.protobuf.enrollment";
+option java_outer_classname = "EnrollmentProto";
+
+package online.eracodes.enrollment;
+
+message CreateUserRequest {
+  string name = 1;
+  string email = 2;
+}
+
+message CreateUserResponse {
+  string registration_code = 1;  // 20-char hex code with embedded checksum
+  string user_id = 2;            // Unique identifier for created user
+  string message = 3;            // Success message
+}
+
+message RegisterUserRequest {
+  string email = 1;
+  string registration_code = 2;  // 20-char hex code with embedded checksum
+}
+
+message RegisterUserResponse {
+  string authentication_token = 1;
+  string user_name = 2;
+  string user_email = 3;
+  string message = 4;            // Success message
+}
+
+message PublicKeyResponse {
+  bytes dilithium_public_key = 1;  // Serialized Dilithium public key
+  string key_algorithm = 2;        // "DILITHIUM2" or similar
+  int64 key_generated_at = 3;      // Timestamp when key was generated
+}
+
+// Signed response wrapper
+message SignedResponse {
+  bytes body = 1;                  // Serialized Protocol Buffer object of the actual response
+  bytes signature = 2;             // Dilithium signature of the serialized body
+}
+
+message ErrorResponse {
+  int32 error_code = 1;
+  string error_message = 2;
+  string timestamp = 3;
+}
+
+message AdminLoginRequest {
+  string username = 1;
+  string password = 2;
+}
+
+message AdminLoginResponse {
+  string admin_token = 1;
+  string admin_name = 2;
+  bool success = 3;
+}

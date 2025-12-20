@@ -5,6 +5,14 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
+### For Maven Builds ###
+target/
+!**/src/main/**/target/
+!**/src/test/**/target/
+.mvn/
+
+.DS_Store
+
 ### STS ###
 .apt_generated
 .classpath
