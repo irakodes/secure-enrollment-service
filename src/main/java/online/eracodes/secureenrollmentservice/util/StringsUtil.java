@@ -57,10 +57,18 @@ public class StringsUtil {
         return hex.substring(0, length);
     }
 
-    public static String generateRegistrationCode(String username) {
+    private static String generateRegistrationCode(String username) {
         var usernameInHex = String.format("%08x", username.hashCode());
         var code = generateHexadecimalCode(8);
 
         return usernameInHex + code;
+    }
+
+    public static String getRegistrationCode(String username) {
+        var registrationCode = generateRegistrationCode(username);
+        var hashValue = hashRegistrationCode(registrationCode);
+        var checksum = md5HashHandler(hashValue);
+
+        return registrationCode + checksum;
     }
 }
