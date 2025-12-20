@@ -1,38 +1,28 @@
 package online.eracodes.secureenrollmentservice.util;
 
-import org.springframework.util.DigestUtils;
-
-import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 
 public class StringsUtil {
 
     /**
-     * Hashes the registration code generated with MD5 Hash
-     *
-     * @param registrationCode The generated code
-     * @return An MD5 hash of the registration code
-     */
-    private static byte[] hashRegistrationCode(String registrationCode) {
-        return DigestUtils.md5Digest(registrationCode.getBytes(StandardCharsets.UTF_8));
-    }
-
-    /**
      * Handles MD5 Hash and returns the last two bytes of the hash
      *
-     * @param hashValue The MD5 Hash Value
+     * @param hash The MD5 Hash Value
      * @return The last two bytes of the MD5 Hash
      */
-    private static String md5HashHandler(byte[] hashValue) {
+    private static String md5HashHandler(byte[] hash) {
         // Get the last two bytes of the MD5 Hash value
-        var checksum = String.format("%02x%02x", hashValue[hashValue.length - 2],
-                hashValue[hashValue.length - 1]);
+        var secondToLastByte = hash[hash.length - 2] & 0xFF;
+        var lastByte = hash[hash.length - 1] & 0xFF;
 
-        if (checksum.isEmpty()) throw new IllegalArgumentException("Invalid registration code");
-        if (checksum.length() > 4) throw new IllegalArgumentException("Checksum length cannot exceed 4 characters");
+        //var checksum = String.format("%02x", secondToLastByte) +
+        // String.format("%02x", lastByte);
+
+        //if (checksum.isEmpty()) throw new IllegalArgumentException("Invalid registration code");
+        //if (checksum.length() > 4) throw new IllegalArgumentException("Checksum length cannot exceed 4 characters");
 
         // At this point I am sure the length is valid
-        return checksum;
+        return String.format("%02x%02x", secondToLastByte, lastByte);
     }
 
     /**
@@ -57,6 +47,11 @@ public class StringsUtil {
         return hex.substring(0, length);
     }
 
+    /**
+     * Generates the first 16 characters of the registration code based off the username
+     * @param username The user's unique username
+     * @return A 16 Characters long hexadecimal code
+     */
     private static String generateRegistrationCode(String username) {
         var usernameInHex = String.format("%08x", username.hashCode());
         var code = generateHexadecimalCode(8);
@@ -64,11 +59,29 @@ public class StringsUtil {
         return usernameInHex + code;
     }
 
+    /**
+     * Generates the 20-character verified code of the 16-character long registration code
+     * @param username The user's unique username
+     * @return A 20 Characters long hexadecimal code
+     */
     public static String getRegistrationCode(String username) {
         var registrationCode = generateRegistrationCode(username);
-        var hashValue = hashRegistrationCode(registrationCode);
+        var hashValue = EncryptionUtil.getMD5Hash(registrationCode);
         var checksum = md5HashHandler(hashValue);
 
         return registrationCode + checksum;
+    }
+
+    /**
+     * Verifies registration code via check summing
+     */
+    public static boolean isRegistrationCodeVerified(String code) {
+        if (code.length() != 20) return false;
+        var registrationCode = code.substring(0, 16);
+        var checksum = code.substring(16);
+
+        var hashValue = EncryptionUtil.getMD5Hash(registrationCode);
+
+        return checksum.equalsIgnoreCase(md5HashHandler(hashValue));
     }
 }
