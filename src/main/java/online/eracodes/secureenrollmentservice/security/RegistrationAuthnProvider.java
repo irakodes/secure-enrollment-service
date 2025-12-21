@@ -39,11 +39,16 @@ public class RegistrationAuthnProvider
             throw new BadCredentialsException("Checksum failed");
         }
 
+        log.info("Checksum validation successful");
+        log.info("DB Check for user: {}", email);
         var user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BadCredentialsException("User not found"));
         log.debug("User: {}", user);
         log.trace("Pass code: {}", user.getRegistrationCode());
 
+        log.info("User {} exists", email);
+
+        // Check if user is already registered
         if (user.isRegistered()) {
             throw new BadCredentialsException("User already registered");
         }
