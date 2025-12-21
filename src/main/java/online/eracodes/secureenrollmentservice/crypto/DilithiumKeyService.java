@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.pqc.jcajce.spec.DilithiumParameterSpec;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -26,7 +25,6 @@ import java.security.spec.X509EncodedKeySpec;
  * following industry best practices for key serialization.
  */
 @Slf4j
-@Service
 public class DilithiumKeyService {
 
     private static final String KEY_ALGORITHM = "Dilithium";
