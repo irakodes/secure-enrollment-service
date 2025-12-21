@@ -1,6 +1,11 @@
 package online.eracodes.secureenrollmentservice.util;
 
+import online.eracodes.secureenrollmentservice.entity.User;
+
+import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
+import java.util.Base64;
+import java.util.UUID;
 
 public class StringsUtil {
 
@@ -49,6 +54,7 @@ public class StringsUtil {
 
     /**
      * Generates the first 16 characters of the registration code based off the username
+     *
      * @param username The user's unique username
      * @return A 16 Characters long hexadecimal code
      */
@@ -61,6 +67,7 @@ public class StringsUtil {
 
     /**
      * Generates the 20-character verified code of the 16-character long registration code
+     *
      * @param username The user's unique username
      * @return A 20 Characters long hexadecimal code
      */
@@ -83,5 +90,14 @@ public class StringsUtil {
         var hashValue = EncryptionUtil.getMD5Hash(registrationCode);
 
         return checksum.equalsIgnoreCase(md5HashHandler(hashValue));
+    }
+
+    public static String tokenGenerator(User user) {
+        var time = System.currentTimeMillis();
+        var regCode = generateRegistrationCode(user.getEmail());
+        var uniqueId = UUID.randomUUID().toString().replaceAll("[^a-zA-Z]", "");
+
+        var token = time + regCode + uniqueId;
+        return Base64.getEncoder().encodeToString(token.getBytes(StandardCharsets.UTF_8));
     }
 }
