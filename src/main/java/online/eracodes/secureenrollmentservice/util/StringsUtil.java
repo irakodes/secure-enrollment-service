@@ -2,7 +2,6 @@ package online.eracodes.secureenrollmentservice.util;
 
 import lombok.extern.slf4j.Slf4j;
 import online.eracodes.secureenrollmentservice.entity.User;
-import org.springframework.core.type.filter.RegexPatternTypeFilter;
 
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
