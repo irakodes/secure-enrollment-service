@@ -12,6 +12,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import static online.eracodes.secureenrollmentservice.util.StringsUtil.isRegistrationCodeVerified;
+import static online.eracodes.secureenrollmentservice.util.StringsUtil.tokenGenerator;
+
 
 @Slf4j
 @Component
@@ -25,21 +28,21 @@ public class RegistrationAuthnProvider
     @Override
     public Authentication authenticate(@NonNull Authentication authentication) {
 
-        var token = (RegistrationAuthnToken) authentication;
+        var authn = (RegistrationAuthnToken) authentication;
 
-        var email = (String) token.getPrincipal();
-        var fullCode = (String) token.getCredentials();
+        var email = (String) authn.getPrincipal();
+        var fullCode = (String) authn.getCredentials();
 
         if (fullCode == null) throw new IllegalArgumentException("Registration code cannot be null");
 
-        if (!StringsUtil.isRegistrationCodeVerified(fullCode)) {
-            throw new BadCredentialsException("Invalid registration code checksum");
+        if (!isRegistrationCodeVerified(fullCode)) {
+            throw new BadCredentialsException("Checksum failed");
         }
 
         var user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BadCredentialsException("User not found"));
         log.debug("User: {}", user);
-        log.debug("Pass code: {}", user.getRegistrationCode());
+        log.trace("Pass code: {}", user.getRegistrationCode());
 
         if (user.isRegistered()) {
             throw new BadCredentialsException("User already registered");
@@ -51,11 +54,13 @@ public class RegistrationAuthnProvider
             throw new BadCredentialsException("Invalid secret pass code");
         }
 
-        user.setAuthToken(StringsUtil.tokenGenerator(user));
+        user.setAuthToken(tokenGenerator(user));
         user.setRegistered(true);
+        user.setEnabled(true);
+
         userRepository.save(user);
 
-        AppUser userDetails = new AppUser(user);
+        var userDetails = new AppUser(user);
 
         return new RegistrationAuthnToken(userDetails);
     }

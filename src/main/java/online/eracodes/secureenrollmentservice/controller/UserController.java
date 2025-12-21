@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import online.eracodes.protobuf.enrollment.EnrollmentProto;
 import online.eracodes.protobuf.user.UserProto;
-import online.eracodes.secureenrollmentservice.service.UserService;
+import online.eracodes.secureenrollmentservice.service.IUserService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/users")
 public class UserController {
 
-    private final UserService userService;
+    private final IUserService userService;
 
     @GetMapping(
             value = "/get",

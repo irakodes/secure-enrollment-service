@@ -10,6 +10,8 @@ public class RegistrationAuthnToken
         extends AbstractAuthenticationToken {
 
     private final String email;
+
+    // Registration Code field is treated like a password
     private final String registrationCode;
     private final AppUser principal;
 

@@ -1,10 +1,12 @@
 package online.eracodes.secureenrollmentservice.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import online.eracodes.protobuf.enrollment.EnrollmentProto;
 import online.eracodes.secureenrollmentservice.entity.AppUser;
 import online.eracodes.secureenrollmentservice.security.RegistrationAuthnProvider;
 import online.eracodes.secureenrollmentservice.security.RegistrationAuthnToken;
+import online.eracodes.secureenrollmentservice.service.IUserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
@@ -15,12 +17,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/register")
 public class RegistrationController {
-    private final static Logger LOG = LoggerFactory.getLogger(RegistrationController.class);
-    private final RegistrationAuthnProvider registrationAuthnProvider;
+    private final IUserService userService;
 
     /*@PostMapping(
             value = "/",
@@ -35,37 +37,12 @@ public class RegistrationController {
     @PostMapping(
             value = "/complete",
             consumes = MediaType.APPLICATION_OCTET_STREAM_VALUE,
-            produces = { MediaType.APPLICATION_OCTET_STREAM_VALUE }
+            produces = {MediaType.APPLICATION_OCTET_STREAM_VALUE}
     )
     public ResponseEntity<EnrollmentProto.RegisterUserResponse> completeRegistration(
             @RequestBody EnrollmentProto.RegisterUserRequest request) {
-        LOG.debug("Registration request for email: {}", request.getEmail());
-
-        try {
-            var authToken = new RegistrationAuthnToken(
-                    request.getEmail(),
-                    request.getRegistrationCode()
-            );
-
-            var authenticatedToken = (RegistrationAuthnToken) registrationAuthnProvider
-                    .authenticate(authToken);
-
-            var appUser = (AppUser) authenticatedToken.getPrincipal();
-
-            var response = EnrollmentProto.RegisterUserResponse.newBuilder()
-                    .setAuthenticationToken(appUser.getAuthToken())
-                    .setUserName(appUser.getEmail())
-                    .setUserEmail(appUser.getEmail())
-                    .setMessage("Registration completed successfully")
-                    .build();
-
-            return ResponseEntity.ok(response);
-        } catch (BadCredentialsException e) {
-            LOG.error("Registration failed: {}", e.getMessage());
-            throw e;
-        } catch (Exception e) {
-            LOG.error("Unexpected error during registration", e);
-            throw new RuntimeException("Registration failed", e);
-        }
+        log.debug("Registration request for email: {}", request.getEmail());
+        var response = userService.registerUser(request);
+        return ResponseEntity.ok(response);
     }
 }
