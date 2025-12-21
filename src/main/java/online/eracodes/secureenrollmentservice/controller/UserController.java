@@ -4,6 +4,7 @@ import com.google.protobuf.Message;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import online.eracodes.protobuf.enrollment.EnrollmentProto;
+import online.eracodes.protobuf.login.LoginProto;
 import online.eracodes.protobuf.user.UserProto;
 import online.eracodes.secureenrollmentservice.service.IUserService;
 import org.springframework.http.HttpStatus;
@@ -48,5 +49,23 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .location(location)
                 .body(response);
+    }
+
+    @PostMapping(value = "/login",
+            consumes = MediaType.APPLICATION_OCTET_STREAM_VALUE,
+            produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    public ResponseEntity<Message> userLogin(@RequestBody LoginProto.Login login) {
+        var loginResponse = userService.loginUser(login);
+        log.debug("Login Response: {}", loginResponse);
+
+        if (!loginResponse.getSuccess()) {
+            var message = LoginProto.LoginResponse.newBuilder()
+                    .setSuccess(false)
+                    .setMessage("Login failed")
+                    .build();
+            return ResponseEntity.badRequest().body(message);
+        }
+
+        return ResponseEntity.ok(loginResponse);
     }
 }
