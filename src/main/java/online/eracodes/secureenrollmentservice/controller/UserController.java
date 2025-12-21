@@ -39,6 +39,8 @@ public class UserController {
     )
     public ResponseEntity<Message> createNewUser(@RequestBody EnrollmentProto.CreateUserRequest request) {
         var response = userService.createUser(request);
+
+        //TODO: This should be an HTTP 201 Created
         return ResponseEntity.ok(response);
     }
 }
