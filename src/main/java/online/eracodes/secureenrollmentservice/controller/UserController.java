@@ -1,5 +1,6 @@
 package online.eracodes.secureenrollmentservice.controller;
 
+import com.google.protobuf.Message;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import online.eracodes.protobuf.enrollment.EnrollmentProto;
@@ -36,7 +37,7 @@ public class UserController {
             consumes = {MediaType.APPLICATION_OCTET_STREAM_VALUE},
             produces = {MediaType.APPLICATION_OCTET_STREAM_VALUE}
     )
-    public ResponseEntity<?> createNewUser(@RequestBody EnrollmentProto.CreateUserRequest request) {
+    public ResponseEntity<Message> createNewUser(@RequestBody EnrollmentProto.CreateUserRequest request) {
         var response = userService.createUser(request);
         return ResponseEntity.ok(response);
     }

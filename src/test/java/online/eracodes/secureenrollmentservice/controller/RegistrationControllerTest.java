@@ -64,7 +64,7 @@ class RegistrationControllerTest {
                 .build();
 
         // Execute the request
-        ResponseEntity<EnrollmentProto.RegisterUserResponse> response = 
+        ResponseEntity<EnrollmentProto.RegisterUserResponse> response =
                 registrationController.completeRegistration(request);
 
         // Verify response
