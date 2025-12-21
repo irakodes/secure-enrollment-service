@@ -10,12 +10,20 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/users")
 public class UserController {
 
-    @GetMapping(produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    @GetMapping(
+            consumes = { MediaType.APPLICATION_OCTET_STREAM_VALUE },
+            produces = { MediaType.APPLICATION_OCTET_STREAM_VALUE }
+    )
     public UserProto.User getUser() {
         return UserProto.User.newBuilder()
                 .setId(1)
                 .setName("John Doe")
                 .setEmail("john.doe@example.com")
                 .build();
+    }
+
+    @GetMapping("/test")
+    public String test() {
+        return "Server is running! H2 console should be at /h2-console";
     }
 }
