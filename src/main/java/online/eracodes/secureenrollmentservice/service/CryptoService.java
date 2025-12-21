@@ -4,12 +4,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import online.eracodes.protobuf.enrollment.EnrollmentProto;
 import online.eracodes.secureenrollmentservice.crypto.DilithiumKeyService;
-import org.bouncycastle.pqc.jcajce.spec.DilithiumParameterSpec;
+//import org.bouncycastle.pqc.jcajce.spec.DilithiumParameterSpec;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.security.PublicKey;
+//import java.security.PublicKey;
 
 @Slf4j
 @Component
