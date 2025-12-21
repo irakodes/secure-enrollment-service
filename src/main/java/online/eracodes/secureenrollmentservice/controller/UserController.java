@@ -1,20 +1,43 @@
 package online.eracodes.secureenrollmentservice.controller;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import online.eracodes.protobuf.enrollment.EnrollmentProto;
 import online.eracodes.protobuf.user.UserProto;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import online.eracodes.secureenrollmentservice.service.IUserService;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
+
+@Slf4j
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/users")
 public class UserController {
 
-    @GetMapping(produces = "application/x-protobuf")
+    private final IUserService userService;
+
+    @GetMapping(
+            value = "/get",
+            consumes = {MediaType.APPLICATION_OCTET_STREAM_VALUE},
+            produces = {MediaType.APPLICATION_OCTET_STREAM_VALUE}
+    )
     public UserProto.User getUser() {
         return UserProto.User.newBuilder()
                 .setId(1)
                 .setName("John Doe")
                 .setEmail("john.doe@example.com")
                 .build();
+    }
+
+    @PostMapping(
+            value = "/",
+            consumes = {MediaType.APPLICATION_OCTET_STREAM_VALUE},
+            produces = {MediaType.APPLICATION_OCTET_STREAM_VALUE}
+    )
+    public ResponseEntity<?> createNewUser(@RequestBody EnrollmentProto.CreateUserRequest request) {
+        var response = userService.createUser(request);
+        return ResponseEntity.ok(response);
     }
 }
