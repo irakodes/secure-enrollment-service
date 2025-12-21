@@ -50,8 +50,12 @@ public class UserService implements IUserService {
                 .setMessage("User created successfully")
                 .build();
 
-        log.info("User {} registration code generated is: {}", user.getEmail(), userCode);
-
+        log.info("User {} registration code generated", user.getEmail());
+        log.info("""
+                {}+-----------------------------------------+
+                | CODE: {}              |
+                +-----------------------------------------+
+                """, System.lineSeparator(), userCode);
         return response;
     }
 

@@ -72,8 +72,8 @@ class RegistrationControllerTest {
         assertNotNull(response.getBody());
         
         EnrollmentProto.RegisterUserResponse responseBody = response.getBody();
-        assertNotNull(responseBody.getAuthenticationToken(), "Auth token should be present");
-        assertEquals(testEmail, responseBody.getUserEmail());
+        assertNotNull(responseBody.getAuthToken(), "Auth token should be present");
+        assertEquals(testEmail, responseBody.getEmail());
         assertTrue(responseBody.getMessage().contains("success"), "Should have success message");
 
         // Verify user was updated

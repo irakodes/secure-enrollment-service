@@ -59,3 +59,4 @@ out/
 ### Cryptographic Keys ###
 data/keys/
 *.key
+/SIGNING_RESPONSE_ADVICE_ISSUES.md
