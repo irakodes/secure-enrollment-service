@@ -7,7 +7,7 @@ import java.security.SignatureException;
 
 public class DilithiumSigner {
 
-    public byte[] sign(byte[] message) throws NoSuchAlgorithmException, NoSuchProviderException {
+    public static final byte[] sign(byte[] message) throws NoSuchAlgorithmException, NoSuchProviderException {
         var sig = Signature.getInstance("Dilithium", "BCPQC");
         // sig.initSign(privateKey);
         try {
