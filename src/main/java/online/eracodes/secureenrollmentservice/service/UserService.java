@@ -107,7 +107,8 @@ public class UserService implements IUserService {
         var user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new BadCredentialsException("Wrong credentials!"));
 
-        var rat = new RegistrationAuthnToken(
+        // Token, stored as plain-text is the basis for subsequent authentication
+        /*var rat = new RegistrationAuthnToken(
                 request.getEmail(),
                 user.getRegistrationCode()
         );
@@ -117,11 +118,17 @@ public class UserService implements IUserService {
         if (authn == null) throw new BadCredentialsException("User was not found!");
 
         var appUser = (AppUser) authn.getPrincipal();
-        log.debug("User Principal Loaded: {}", appUser);
+        log.debug("User Principal Loaded: {}", appUser);*/
+
+        if (user.getAuthToken().equals(request.getToken()))
+            return LoginProto.LoginResponse.newBuilder()
+                    .setSuccess(true)
+                    .setMessage("Login successful")
+                    .build();
 
         return LoginProto.LoginResponse.newBuilder()
-                .setSuccess(true)
-                .setMessage("Login successful")
+                .setSuccess(false)
+                .setMessage("Login failed")
                 .build();
     }
 
