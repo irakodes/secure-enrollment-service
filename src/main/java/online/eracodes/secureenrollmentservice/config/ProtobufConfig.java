@@ -38,13 +38,13 @@ public class ProtobufConfig implements WebMvcConfigurer {
             @Override
             public boolean canRead(Class<?> clazz, MediaType mediaType) {
                 return Message.class.isAssignableFrom(clazz) &&
-                        (mediaType == null || mediaType.equals(MediaType.APPLICATION_OCTET_STREAM));
+                        (mediaType == null || mediaType.isCompatibleWith(MediaType.APPLICATION_OCTET_STREAM));
             }
 
             @Override
             public boolean canWrite(Class<?> clazz, MediaType mediaType) {
                 return Message.class.isAssignableFrom(clazz) &&
-                        (mediaType == null || mediaType.equals(MediaType.APPLICATION_OCTET_STREAM));
+                        (mediaType == null || mediaType.isCompatibleWith(MediaType.APPLICATION_OCTET_STREAM));
             }
 
             @Override
