@@ -60,7 +60,7 @@ public class UserService implements IUserService {
 
             var authenticatedToken = (RegistrationAuthnToken) regAuthnProvider
                     .authenticate(authn);
-            log.debug(">>> Authenticated token: {}", authenticatedToken);
+            log.debug("Authenticated token: {}", authenticatedToken);
 
             if (authenticatedToken == null) throw new BadCredentialsException("Invalid registration code");
 
