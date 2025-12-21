@@ -2,11 +2,14 @@ package online.eracodes.secureenrollmentservice.util;
 
 import lombok.extern.slf4j.Slf4j;
 import online.eracodes.secureenrollmentservice.entity.User;
+import org.springframework.core.type.filter.RegexPatternTypeFilter;
 
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.UUID;
+
+import static online.eracodes.secureenrollmentservice.util.EmailValidatorUtil.validateOrThrow;
 
 @Slf4j
 public class StringsUtil {
@@ -105,5 +108,11 @@ public class StringsUtil {
 
         var token = time + regCode + uniqueId;
         return Base64.getEncoder().encodeToString(token.getBytes(StandardCharsets.UTF_8));
+    }
+
+    public static boolean isEmailValid(String email) {
+        try { validateOrThrow(email); }
+        catch (IllegalArgumentException e) { return false; }
+        return true;
     }
 }

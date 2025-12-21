@@ -37,7 +37,7 @@ public class RegistrationAuthnProvider
         var user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BadCredentialsException("User not found"));
 
-        if (!user.isRegistered()) {
+        if (user.isRegistered()) {
             throw new BadCredentialsException("User already registered");
         }
 

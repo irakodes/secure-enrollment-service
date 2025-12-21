@@ -22,7 +22,7 @@ public class RegistrationController {
     private final static Logger LOG = LoggerFactory.getLogger(RegistrationController.class);
     private final RegistrationAuthnProvider registrationAuthnProvider;
 
-    @PostMapping(
+    /*@PostMapping(
             value = "/",
             consumes = { MediaType.APPLICATION_OCTET_STREAM_VALUE },
             produces = { MediaType.APPLICATION_OCTET_STREAM_VALUE }
@@ -30,7 +30,7 @@ public class RegistrationController {
     public ResponseEntity<?> registerUser(@RequestBody EnrollmentProto.CreateUserRequest request) {
         LOG.debug("Incoming request: {}", request);
         throw new UnsupportedOperationException("Registration endpoint not yet implemented.");
-    }
+    }*/
 
     @PostMapping(
             value = "/complete",

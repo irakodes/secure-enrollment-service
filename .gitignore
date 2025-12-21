@@ -50,3 +50,7 @@ out/
 /generate_request.py
 /request.bin
 /QUICK_TEST_GUIDE.md
+/create_user.py
+/CREATE_USER_GUIDE.md
+/generate_registration_code_info.py
+/john_request.bin
