@@ -1,5 +1,6 @@
 package online.eracodes.secureenrollmentservice.util;
 
+import lombok.extern.slf4j.Slf4j;
 import online.eracodes.secureenrollmentservice.entity.User;
 
 import java.nio.charset.StandardCharsets;
@@ -7,6 +8,7 @@ import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.UUID;
 
+@Slf4j
 public class StringsUtil {
 
     /**
@@ -27,6 +29,7 @@ public class StringsUtil {
         //if (checksum.length() > 4) throw new IllegalArgumentException("Checksum length cannot exceed 4 characters");
 
         // At this point I am sure the length is valid
+        log.debug("Checksum: {}", String.format("%02x%02x", secondToLastByte, lastByte));
         return String.format("%02x%02x", secondToLastByte, lastByte);
     }
 
@@ -85,7 +88,10 @@ public class StringsUtil {
     public static boolean isRegistrationCodeVerified(String code) {
         if (code.length() != 20) return false;
         var registrationCode = code.substring(0, 16);
+        log.debug("User's registration code: {}", registrationCode);
+
         var checksum = code.substring(16);
+        log.debug("Checksum to validate: {}", checksum);
 
         var hashValue = EncryptionUtil.getMD5Hash(registrationCode);
 
