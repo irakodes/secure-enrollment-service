@@ -21,9 +21,9 @@ import static online.eracodes.secureenrollmentservice.util.StringsUtil.isEmailVa
 @RequiredArgsConstructor
 public class UserService implements IUserService {
 
-    private final RegistrationAuthnProvider regAuthnProvider;
-    private final UserRepository userRepository;
     private final PasswordEncoder pwdEncoder;
+    private final UserRepository userRepository;
+    private final RegistrationAuthnProvider regAuthnProvider;
 
     @Override
     public EnrollmentProto.CreateUserResponse createUser(EnrollmentProto.CreateUserRequest request) {

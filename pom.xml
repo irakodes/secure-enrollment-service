@@ -121,6 +121,21 @@
             <groupId>org.thymeleaf.extras</groupId>
             <artifactId>thymeleaf-extras-springsecurity6</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bc-fips</artifactId>
+            <version>2.1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk18on</artifactId>
+            <version>1.71</version>
+        </dependency>
+        <!--<dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcpqc-java18on</artifactId>
+            <version>1.0.0</version>
+        </dependency>-->
     </dependencies>
     <dependencyManagement>
         <dependencies>
