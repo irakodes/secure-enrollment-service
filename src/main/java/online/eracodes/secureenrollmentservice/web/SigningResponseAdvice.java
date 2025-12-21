@@ -1,10 +1,8 @@
 package online.eracodes.secureenrollmentservice.web;
 
-import com.google.protobuf.Message;
-import lombok.RequiredArgsConstructor;
-import online.eracodes.secureenrollmentservice.protobuf.SignedResponseFactory;
+import java.util.Map;
+
 import org.jspecify.annotations.Nullable;
-import org.springframework.beans.factory.FactoryBean;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -13,7 +11,10 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
-import java.util.Map;
+import com.google.protobuf.Message;
+
+import lombok.RequiredArgsConstructor;
+import online.eracodes.secureenrollmentservice.protobuf.SignedResponseFactory;
 
 @ControllerAdvice
 @RequiredArgsConstructor
