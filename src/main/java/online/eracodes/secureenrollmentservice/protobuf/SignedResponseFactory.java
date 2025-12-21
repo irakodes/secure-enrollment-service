@@ -38,6 +38,7 @@ public class SignedResponseFactory {
         }
 
         try {
+            log.info("Wrapping response with Dilithium signature");
             var bodyBytes = body.toByteArray();
 
             // Signing the serialized message body using Dilithium
