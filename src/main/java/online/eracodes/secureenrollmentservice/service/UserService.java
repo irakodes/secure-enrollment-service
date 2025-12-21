@@ -3,14 +3,20 @@ package online.eracodes.secureenrollmentservice.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import online.eracodes.protobuf.enrollment.EnrollmentProto;
+import online.eracodes.secureenrollmentservice.crypto.DilithiumKeyService;
 import online.eracodes.secureenrollmentservice.entity.AppUser;
 import online.eracodes.secureenrollmentservice.entity.User;
 import online.eracodes.secureenrollmentservice.repository.UserRepository;
 import online.eracodes.secureenrollmentservice.security.RegistrationAuthnProvider;
 import online.eracodes.secureenrollmentservice.security.RegistrationAuthnToken;
+import org.bouncycastle.pqc.jcajce.spec.DilithiumParameterSpec;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.security.PublicKey;
 
 
 import static online.eracodes.secureenrollmentservice.util.StringsUtil.getRegistrationCode;
@@ -21,9 +27,10 @@ import static online.eracodes.secureenrollmentservice.util.StringsUtil.isEmailVa
 @RequiredArgsConstructor
 public class UserService implements IUserService {
 
-    private final RegistrationAuthnProvider regAuthnProvider;
-    private final UserRepository userRepository;
     private final PasswordEncoder pwdEncoder;
+    private final UserRepository userRepository;
+    private final RegistrationAuthnProvider regAuthnProvider;
+    private final DilithiumKeyService dilithiumKeyService;
 
     @Override
     public EnrollmentProto.CreateUserResponse createUser(EnrollmentProto.CreateUserRequest request) {
@@ -43,8 +50,12 @@ public class UserService implements IUserService {
                 .setMessage("User created successfully")
                 .build();
 
-        log.info("User {} registration code generated is: {}", user.getEmail(), userCode);
-
+        log.info("User {} registration code generated", user.getEmail());
+        log.info("""
+                {}+-----------------------------------------+
+                | CODE: {}              |
+                +-----------------------------------------+
+                """, System.lineSeparator(), userCode);
         return response;
     }
 
@@ -67,9 +78,9 @@ public class UserService implements IUserService {
             var appUser = (AppUser) authenticatedToken.getPrincipal();
 
             var response = EnrollmentProto.RegisterUserResponse.newBuilder()
-                    .setAuthenticationToken(appUser.getAuthToken())
-                    .setUserName(appUser.getEmail())
-                    .setUserEmail(appUser.getEmail())
+                    .setAuthToken(appUser.getAuthToken())
+                    .setUsername(appUser.getEmail())
+                    .setEmail(appUser.getEmail())
                     .setMessage("Registration completed successfully")
                     .build();
 
@@ -81,11 +92,6 @@ public class UserService implements IUserService {
             log.error("Unexpected error during registration", e);
             throw new RuntimeException("Registration failed", e);
         }
-    }
-
-    @Override
-    public EnrollmentProto.PublicKeyResponse getPublicKey() {
-        return null;
     }
 
     private User mapRequestToUser(EnrollmentProto.CreateUserRequest request, String registrationCode) {

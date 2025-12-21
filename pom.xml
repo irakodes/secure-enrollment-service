@@ -65,7 +65,7 @@
         <dependency>
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-java</artifactId>
-            <version>4.33.2</version>
+            <version>${protobuf-java.version}</version>
         </dependency>
 
         <dependency>
@@ -120,6 +120,25 @@
         <dependency>
             <groupId>org.thymeleaf.extras</groupId>
             <artifactId>thymeleaf-extras-springsecurity6</artifactId>
+        </dependency>
+        <!-- bc-fips removed to avoid conflicts with bcprov-jdk18on -->
+        <!-- If FIPS compliance is required, use bc-fips instead of bcprov-jdk18on -->
+        <!-- <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bc-fips</artifactId>
+            <version>2.1.2</version>
+        </dependency> -->
+        <!-- BouncyCastle Provider - updated to 1.83 to fix NoSuchMethodError -->
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk18on</artifactId>
+            <version>1.83</version>
+        </dependency>
+        <!-- BouncyCastle Post-Quantum Cryptography support for Dilithium -->
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcpkix-jdk18on</artifactId>
+            <version>1.83</version>
         </dependency>
     </dependencies>
     <dependencyManagement>

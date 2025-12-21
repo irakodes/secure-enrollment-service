@@ -55,3 +55,9 @@ out/
 /scripts_and_docs/generate_registration_code_info.py
 /scripts_and_docs/john_request.bin
 /scripts_and_docs/
+
+### Cryptographic Keys ###
+data/keys/
+*.key
+/SIGNING_RESPONSE_ADVICE_ISSUES.md
+/data/
