@@ -74,9 +74,9 @@ public class UserService implements IUserService {
             var appUser = (AppUser) authenticatedToken.getPrincipal();
 
             var response = EnrollmentProto.RegisterUserResponse.newBuilder()
-                    .setAuthenticationToken(appUser.getAuthToken())
-                    .setUserName(appUser.getEmail())
-                    .setUserEmail(appUser.getEmail())
+                    .setAuthToken(appUser.getAuthToken())
+                    .setUsername(appUser.getEmail())
+                    .setEmail(appUser.getEmail())
                     .setMessage("Registration completed successfully")
                     .build();
 
