@@ -23,20 +23,33 @@ public class SigningResponseAdvice implements ResponseBodyAdvice<Message> {
     private final SignedResponseFactory factory;
 
     @Override
-    public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
+    public boolean supports(
+            MethodParameter returnType,
+            Class<? extends HttpMessageConverter<?>> converterType) {
         var success = Message.class.isAssignableFrom(returnType.getParameterType());
         return success;
     }
 
     @Override
-    public @Nullable Message beforeBodyWrite(@Nullable Message body, MethodParameter returnType, MediaType selectedContentType, Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
+    public @Nullable Message beforeBodyWrite(
+            @Nullable Message body,
+            MethodParameter returnType,
+            MediaType selectedContentType,
+            Class<? extends HttpMessageConverter<?>> selectedConverterType,
+            ServerHttpRequest request, ServerHttpResponse response) {
         var signed = factory.wrap(body);
         response.getHeaders().setContentType(MediaType.APPLICATION_OCTET_STREAM);
         return (Message) signed;
     }
 
     @Override
-    public @Nullable Map<String, Object> determineWriteHints(@Nullable Message body, MethodParameter returnType, MediaType selectedContentType, Class<? extends HttpMessageConverter<?>> selectedConverterType) {
-        return ResponseBodyAdvice.super.determineWriteHints(body, returnType, selectedContentType, selectedConverterType);
+    public @Nullable Map<String, Object>
+    determineWriteHints(
+            @Nullable Message body,
+            MethodParameter returnType, MediaType selectedContentType,
+                        Class<? extends HttpMessageConverter<?>> selectedConverterType
+    ) {
+        return ResponseBodyAdvice.super
+                .determineWriteHints(body, returnType, selectedContentType, selectedConverterType);
     }
 }
