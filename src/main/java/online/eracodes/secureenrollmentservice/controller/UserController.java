@@ -35,7 +35,7 @@ public class UserController {
     }
 
     @PostMapping(
-            value = "/",
+            value = "",
             consumes = {MediaType.APPLICATION_OCTET_STREAM_VALUE},
             produces = {MediaType.APPLICATION_OCTET_STREAM_VALUE}
     )
