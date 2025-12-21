@@ -3,6 +3,7 @@ package online.eracodes.secureenrollmentservice.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import online.eracodes.protobuf.enrollment.EnrollmentProto;
+import online.eracodes.protobuf.login.LoginProto;
 import online.eracodes.secureenrollmentservice.crypto.DilithiumKeyService;
 import online.eracodes.secureenrollmentservice.entity.AppUser;
 import online.eracodes.secureenrollmentservice.entity.User;
@@ -92,6 +93,43 @@ public class UserService implements IUserService {
             log.error("Unexpected error during registration", e);
             throw new RuntimeException("Registration failed", e);
         }
+    }
+
+    /**
+     * Authenticates and logs in a user based on the provided login request data.
+     *
+     * @param request the login request containing the email and registration code
+     * @return a LoginResponse indicating the success or failure of the login operation
+     * @throws BadCredentialsException if the provided credentials are invalid or the user is not found
+     */
+    @Override
+    public LoginProto.LoginResponse loginUser(LoginProto.Login request) {
+        var user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new BadCredentialsException("Wrong credentials!"));
+
+        // Token, stored as plain-text is the basis for subsequent authentication
+        /*var rat = new RegistrationAuthnToken(
+                request.getEmail(),
+                user.getRegistrationCode()
+        );
+        var authn = regAuthnProvider.authenticate(rat);
+        log.debug("Authenticated Principal: {}", authn);
+
+        if (authn == null) throw new BadCredentialsException("User was not found!");
+
+        var appUser = (AppUser) authn.getPrincipal();
+        log.debug("User Principal Loaded: {}", appUser);*/
+
+        if (user.getAuthToken().equals(request.getToken()))
+            return LoginProto.LoginResponse.newBuilder()
+                    .setSuccess(true)
+                    .setMessage("Login successful")
+                    .build();
+
+        return LoginProto.LoginResponse.newBuilder()
+                .setSuccess(false)
+                .setMessage("Login failed")
+                .build();
     }
 
     private User mapRequestToUser(EnrollmentProto.CreateUserRequest request, String registrationCode) {

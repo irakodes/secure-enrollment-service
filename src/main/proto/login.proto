@@ -6,6 +6,10 @@ option java_outer_classname = "LoginProto";
 
 message Login {
   string email = 1;
-  string code = 2;
-  string token = 3;
+  string token = 2;
+}
+
+message LoginResponse {
+  bool success = 1;
+  string message = 2;
 }
