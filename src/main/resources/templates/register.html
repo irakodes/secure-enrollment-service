@@ -2,79 +2,371 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>User Registration</title>
+    <title>Test Signed Protobuf Responses</title>
+    <script src="https://cdn.jsdelivr.net/npm/protobufjs@7.4.0/dist/protobuf.min.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; }
-        .form-section { border: 1px solid #ddd; padding: 20px; margin-bottom: 20px; border-radius: 5px; }
-        h2 { margin-top: 0; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input { width: 100%; padding: 8px; box-sizing: border-box; }
-        button { background-color: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
-        button:hover { background-color: #45a049; }
-        .success { background-color: #d4edda; color: #155724; padding: 10px; border-radius: 4px; margin-bottom: 15px; }
-        .error { background-color: #f8d7da; color: #721c24; padding: 10px; border-radius: 4px; margin-bottom: 15px; }
-        .code { font-family: monospace; font-size: 14px; background: #f5f5f5; padding: 10px; border-radius: 4px; word-break: break-all; }
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+
+        .form-section {
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        h2 {
+            margin-top: 0;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .result {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 15px;
+        }
+
+        .result h3 {
+            margin-top: 0;
+        }
+
+        .code {
+            font-family: monospace;
+            font-size: 12px;
+            background: #fff;
+            padding: 10px;
+            border-radius: 4px;
+            word-break: break-all;
+            white-space: pre-wrap;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .signature {
+            color: #0066cc;
+            font-weight: bold;
+        }
+
+        .loading {
+            color: #666;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
-    <h1>User Registration</h1>
+<h1>Test Signed Protobuf Responses</h1>
 
-    <!-- Step 1: Admin Creates User -->
-    <div class="form-section">
-        <h2>Step 1: Create User (Admin)</h2>
-        
-        <div th:if="${createSuccess}" class="success">
-            <strong>User Created!</strong>
-            <p><strong>Registration Code:</strong></p>
-            <div class="code" th:text="${registrationCode}"></div>
-            <p><small>Share this code with the user</small></p>
+<!-- Create User -->
+<div class="form-section">
+    <h2>1. Create User</h2>
+    <form id="createUserForm">
+        <div class="form-group">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required>
         </div>
-        
-        <div th:if="${createError}" class="error">
-            <strong>Error:</strong> <span th:text="${createError}"></span>
+        <div class="form-group">
+            <label for="email1">Email:</label>
+            <input type="email" id="email1" name="email" required>
         </div>
+        <button type="submit">Create User (API Call)</button>
+    </form>
+    <div id="createResult"></div>
+</div>
 
-        <form method="post" action="/create-user">
-            <div class="form-group">
-                <label for="name">Name:</label>
-                <input type="text" id="name" name="name" required>
-            </div>
-            <div class="form-group">
-                <label for="email1">Email:</label>
-                <input type="email" id="email1" name="email" required>
-            </div>
-            <button type="submit">Create User</button>
-        </form>
-    </div>
-
-    <!-- Step 2: User Registers -->
-    <div class="form-section">
-        <h2>Step 2: Register User</h2>
-        
-        <div th:if="${registerSuccess}" class="success">
-            <strong>Registration Successful!</strong>
-            <p><strong>Auth Token:</strong></p>
-            <div class="code" th:text="${authToken}"></div>
-            <p><strong>Username:</strong> <span th:text="${username}"></span></p>
+<!-- Register User -->
+<div class="form-section">
+    <h2>2. Register User</h2>
+    <form id="registerForm">
+        <div class="form-group">
+            <label for="email2">Email:</label>
+            <input type="email" id="email2" name="email" required>
         </div>
-        
-        <div th:if="${registerError}" class="error">
-            <strong>Error:</strong> <span th:text="${registerError}"></span>
+        <div class="form-group">
+            <label for="registrationCode">Registration Code:</label>
+            <input type="text" id="registrationCode" name="registrationCode" required>
         </div>
+        <button type="submit">Register (API Call)</button>
+    </form>
+    <div id="registerResult"></div>
+</div>
 
-        <form method="post" action="/register">
-            <div class="form-group">
-                <label for="email2">Email:</label>
-                <input type="email" id="email2" name="email" required>
-            </div>
-            <div class="form-group">
-                <label for="registrationCode">Registration Code:</label>
-                <input type="text" id="registrationCode" name="registrationCode" required 
-                       placeholder="Enter the 20-character registration code">
-            </div>
-            <button type="submit">Register</button>
-        </form>
-    </div>
+<script>
+    function bytesToHex(bytes) {
+        return Array.from(bytes)
+            .map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    // Hexadecimal to bytes
+    function hexToBytes(hex) {
+        const bytes = [];
+        for (let i = 0; i < hex.length; i += 2) {
+            bytes.push(parseInt(hex.substr(i, 2), 16));
+        }
+        return new Uint8Array(bytes);
+    }
+
+    function parseSignedResponse(buffer) {
+        const view = new DataView(buffer);
+        let tagOffset = 0;
+        const result = { body: null, signature: null };
+
+        while (tagOffset < buffer.byteLength) {
+            const tag = readVarint(view, tagOffset);
+            tagOffset = tag.offset;
+            const fieldNumber = tag.value >>> 3;
+            const wireType = tag.value & 0x7;
+
+            if (wireType === 2) { // Length-delimited
+                const length = readVarint(view, tagOffset);
+                tagOffset = length.offset;
+                const data = new Uint8Array(buffer, tagOffset, length.value);
+                tagOffset += length.value;
+
+                if (fieldNumber === 1) {
+                    result.body = data;
+                } else if (fieldNumber === 2) {
+                    result.signature = data;
+                }
+            } else {
+                tagOffset++;
+            }
+        }
+
+        return result;
+    }
+
+    function readVarint(view, offset) {
+        let result = 0;
+        let shift = 0;
+        let byte;
+        do {
+            byte = view.getUint8(offset++);
+            result |= (byte & 0x7F) << shift;
+            shift += 7;
+        } while (byte & 0x80);
+        return { value: result, offset };
+    }
+
+    // Parse the body message (CreateUserResponse or RegisterUserResponse)
+    function parseBodyMessage(bodyBytes, messageType) {
+        const view = new DataView(bodyBytes.buffer);
+        let offset = 0;
+        const result = {};
+
+        while (offset < bodyBytes.length) {
+            const tag = readVarint(view, offset);
+            offset = tag.offset;
+            const fieldNumber = tag.value >>> 3;
+            const wireType = tag.value & 0x7;
+
+            if (wireType === 2) { // String
+                const length = readVarint(view, offset);
+                offset = length.offset;
+                const decoder = new TextDecoder();
+                const str = decoder.decode(new Uint8Array(bodyBytes.buffer, offset, length.value));
+                offset += length.value;
+
+                if (messageType === 'CreateUserResponse') {
+                    if (fieldNumber === 1) result.registrationCode = str;
+                    else if (fieldNumber === 2) result.userId = str;
+                    else if (fieldNumber === 3) result.message = str;
+                } else if (messageType === 'RegisterUserResponse') {
+                    if (fieldNumber === 1) result.authToken = str;
+                    else if (fieldNumber === 2) result.username = str;
+                    else if (fieldNumber === 3) result.email = str;
+                    else if (fieldNumber === 4) result.message = str;
+                }
+            }
+        }
+
+        return result;
+    }
+
+    async function callAPI(url, method, bodyData) {
+        try {
+            const options = {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/octet-stream',
+                    'Accept': 'application/octet-stream'
+                }
+            };
+
+            if (bodyData) {
+                options.body = bodyData;
+            }
+
+            const response = await fetch(url, options);
+            const arrayBuffer = await response.arrayBuffer();
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            return arrayBuffer;
+        } catch (error) {
+            throw new Error(`API call failed: ${error.message}`);
+        }
+    }
+
+    function createProtobufMessage(fields) {
+        // Simple protobuf encoder for request messages
+        const parts = [];
+
+        for (const [fieldNum, value] of Object.entries(fields)) {
+            const tag = (parseInt(fieldNum) << 3) | 2; // Wire type 2 = length-delimited
+            const encoder = new TextEncoder();
+            const valueBytes = encoder.encode(value);
+
+            // Encode tag
+            let tagBytes = [];
+            let tagVal = tag;
+            do {
+                tagBytes.push((tagVal & 0x7F) | (tagVal > 0x7F ? 0x80 : 0));
+                tagVal >>>= 7;
+            } while (tagVal > 0);
+
+            // Encode length
+            let lenBytes = [];
+            let len = valueBytes.length;
+            do {
+                lenBytes.push((len & 0x7F) | (len > 0x7F ? 0x80 : 0));
+                len >>>= 7;
+            } while (len > 0);
+
+            parts.push(new Uint8Array(tagBytes));
+            parts.push(new Uint8Array(lenBytes));
+            parts.push(valueBytes);
+        }
+
+        const totalLength = parts.reduce((sum, p) => sum + p.length, 0);
+        const result = new Uint8Array(totalLength);
+        let offset = 0;
+        for (const part of parts) {
+            result.set(part, offset);
+            offset += part.length;
+        }
+
+        return result.buffer;
+    }
+
+    function displayResult(elementId, signedResponse, messageType) {
+        const resultDiv = document.getElementById(elementId);
+
+        if (!signedResponse.body || !signedResponse.signature) {
+            resultDiv.innerHTML = '<div class="error">Failed to parse SignedResponse</div>';
+            return;
+        }
+
+        const bodyMessage = parseBodyMessage(signedResponse.body, messageType);
+        const signatureHex = bytesToHex(signedResponse.signature);
+        const bodyHex = bytesToHex(signedResponse.body);
+
+        let html = '<div class="result">';
+        html += '<h3>Signed Response</h3>';
+        html += '<p><strong>Signature (Dilithium):</strong></p>';
+        html += `<div class="code signature">${signatureHex}</div>`;
+        html += `<p><small>Signature length: ${signedResponse.signature.length} bytes</small></p>`;
+
+        html += '<p><strong>Parsed Body Message:</strong></p>';
+        html += '<div class="code">';
+        for (const [key, value] of Object.entries(bodyMessage)) {
+            html += `${key}: ${value}\n`;
+        }
+        html += '</div>';
+
+        html += '<p><strong>Raw Body (hex):</strong></p>';
+        html += `<div class="code">${bodyHex}</div>`;
+        html += '</div>';
+
+        resultDiv.innerHTML = html;
+    }
+
+    // Create User Form Handler
+    document.getElementById('createUserForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const resultDiv = document.getElementById('createResult');
+        resultDiv.innerHTML = '<div class="loading">Calling API...</div>';
+
+        try {
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email1').value;
+
+            const requestData = createProtobufMessage({
+                '1': name,
+                '2': email
+            });
+
+            const responseBuffer = await callAPI('/api/users', 'POST', requestData);
+            const signedResponse = parseSignedResponse(responseBuffer);
+            displayResult('createResult', signedResponse, 'CreateUserResponse');
+
+        } catch (error) {
+            resultDiv.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+        }
+    });
+
+    // Register User Form Handler
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const resultDiv = document.getElementById('registerResult');
+        resultDiv.innerHTML = '<div class="loading">Calling API...</div>';
+
+        try {
+            const email = document.getElementById('email2').value;
+            const registrationCode = document.getElementById('registrationCode').value;
+
+            const requestData = createProtobufMessage({
+                '1': email,
+                '2': registrationCode
+            });
+
+            const responseBuffer = await callAPI('/api/register/complete', 'POST', requestData);
+            const signedResponse = parseSignedResponse(responseBuffer);
+            displayResult('registerResult', signedResponse, 'RegisterUserResponse');
+
+        } catch (error) {
+            resultDiv.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+        }
+    });
+</script>
 </body>
 </html>
