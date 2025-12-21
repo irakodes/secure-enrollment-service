@@ -45,12 +45,13 @@ out/
 
 ### VS Code ###
 .vscode/
-/test-registration-example.md
+/scripts_and_docs/test-registration-example.md
 /src/main/java/online/eracodes/secureenrollmentservice/util/GenerateRegistrationRequest.java
-/generate_request.py
-/request.bin
-/QUICK_TEST_GUIDE.md
-/create_user.py
-/CREATE_USER_GUIDE.md
-/generate_registration_code_info.py
-/john_request.bin
+/scripts_and_docs/generate_request.py
+/scripts_and_docs/request.bin
+/scripts_and_docs/QUICK_TEST_GUIDE.md
+/scripts_and_docs/create_user.py
+/scripts_and_docs/CREATE_USER_GUIDE.md
+/scripts_and_docs/generate_registration_code_info.py
+/scripts_and_docs/john_request.bin
+/scripts_and_docs/

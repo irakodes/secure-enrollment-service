@@ -1,6 +1,7 @@
 package online.eracodes.secureenrollmentservice.security;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import online.eracodes.secureenrollmentservice.entity.AppUser;
 import online.eracodes.secureenrollmentservice.repository.UserRepository;
 import online.eracodes.secureenrollmentservice.util.StringsUtil;
@@ -12,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class RegistrationAuthnProvider
@@ -36,6 +38,8 @@ public class RegistrationAuthnProvider
 
         var user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BadCredentialsException("User not found"));
+        log.debug("User: {}", user);
+        log.debug("Pass code: {}", user.getRegistrationCode());
 
         if (user.isRegistered()) {
             throw new BadCredentialsException("User already registered");
