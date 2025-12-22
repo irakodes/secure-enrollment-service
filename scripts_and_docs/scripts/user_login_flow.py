@@ -9,7 +9,7 @@ Binary Protobuf over HTTP + SignedResponse Handling
 
 import logging
 import sys
-from typing import Tuple
+from typing import Tuple, Optional
 
 import requests
 from google.protobuf.message import DecodeError
@@ -18,6 +18,7 @@ from google.protobuf.message import DecodeError
 # Generated protobuf imports
 from client.enrollmentProto_pb2 import CreateUserRequest, CreateUserResponse
 from client.common_pb2 import SignedResponse
+from client.errorResponse_pb2 import ErrorResponse
 
 BASE_URL = "http://127.0.0.1:8443"
 CREATE_USER_ENDPOINT = "api/users"
@@ -61,11 +62,12 @@ def send_request(binary_data: bytes) -> bytes:
 
     try:
         response = requests.post(url, headers=HEADERS, data=binary_data, timeout=TIMEOUT_IN_SECONDS)
-        response.raise_for_status()
+        # response.raise_for_status()
 
     except requests.exceptions.RequestException as e:
         log.error("HTTP error sending request: %s", e, exc_info=True)
-        raise
+        raise RuntimeError("Failed to send request") from e
+
     log.info("HTTP %s", response.status_code)
 
     if response.status_code not in (200, 201):
@@ -78,13 +80,13 @@ def send_request(binary_data: bytes) -> bytes:
     return response.content
 
 
-def parse_signed_response(response_bytes: bytes) -> Tuple[bytes, bytes]:
+def parse_signed_response(raw: bytes) -> Tuple[bytes, bytes]:
     log.debug("Parsing SignedResponse protobuf")
 
     signed = SignedResponse()
 
     try:
-        signed.ParseFromString(response_bytes)
+        signed.ParseFromString(raw)
 
     except DecodeError as e:
         log.error("Failed to parse SignedResponse protobuf: %s", e, exc_info=True)
@@ -106,9 +108,25 @@ def parse_create_user_response(payload: bytes) -> CreateUserResponse:
 
     return response
 
+def try_parse_success(payload: bytes) -> Optional[CreateUserResponse]:
+    response = CreateUserResponse()
+    try:
+        response.parseFromString(payload)
+        return response
+    except DecodeError:
+        return None
+
+def try_parse_error(payload: bytes) -> Optional[ErrorResponse]:
+    error = ErrorResponse()
+    try:
+        error.parseFromString(payload)
+        return error
+    except DecodeError:
+        return None
+
 def main() -> None:
     setup_logging()
-    log.info("Starting user enrollment flow")
+    log.info("[STEP 1] -- Creating A User")
 
     # Step 1: Input (To Configure Later)
     name = "John Doe"
@@ -120,10 +138,26 @@ def main() -> None:
     payload, signature = parse_signed_response(raw_response)
     log.debug("Dilithium Signature Hex: %s", signature.hex())
 
-    create_user_response = parse_create_user_response(payload)
+    #create_user_response = parse_create_user_response(payload)
+    # --- Attempting to parse the success response first ---
+    success = try_parse_success(payload)
+    if success:
+        log.info("User Created Successfully")
+        log.info("User ID: %s", success.userId)
+        return
 
-    log.info("User Created Successfully")
-    log.info("User ID: %s", create_user_response.userId)
+    error = try_parse_error(payload)
+    if error:
+        log.error("Service error occurred")
+        log.error("Error ID   : %s", error.errorId)
+        log.error("Error Code : %s", error.errorCode)
+        log.error("Message    : %s", error.message)
+        log.error("Path       : %s", error.path)
+        return
+
+    # ---- Unknown payload
+    log.critical("Unknown payload type received")
+    raise RuntimeError("Unrecognized payload in SignedResponse")
 
 if __name__ == "__main__":
     main()
