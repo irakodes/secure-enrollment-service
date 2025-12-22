@@ -8,6 +8,7 @@ Designed to be extensible for multiple data sources and consumers.
 """
 import csv
 import logging
+import sys
 
 from abc import ABC, abstractmethod
 from random import choice
@@ -15,6 +16,7 @@ from typing import Dict, Optional
 from pathlib import Path
 
 log = logging.getLogger(__name__)
+
 
 class DataProvider(ABC):
     """
@@ -29,9 +31,9 @@ class DataProvider(ABC):
         Returns:
             List of dictionaries where keys are column names and values are the corresponding data.
         """
-        #raise NotImplementedError("Subclasses must implement get_all_records method.")
+        # raise NotImplementedError("Subclasses must implement get_all_records method.")
         pass
-    
+
     @abstractmethod
     def get_random_record(self) -> Optional[Dict[str, str]]:
         """
@@ -51,6 +53,7 @@ class DataProvider(ABC):
             Integer count of records.
         """
         pass
+
 
 class CSVDataProvider(DataProvider):
     """CSV file data provider implementation."""
@@ -107,6 +110,7 @@ class CSVDataProvider(DataProvider):
     def get_record_count(self) -> int:
         """Get total number of records."""
         return len(self.records)
+
 
 class DataHelperService:
     """
@@ -200,6 +204,7 @@ class DataHelperService:
         """Get total number of records in the data source."""
         return self.provider.get_record_count()
 
+
 def create_data_helper_service(csv_path: Optional[Path] = None) -> DataHelperService:
     """
     Factory method to create a DataHelperService instance.
@@ -223,11 +228,12 @@ def create_data_helper_service(csv_path: Optional[Path] = None) -> DataHelperSer
     provider = CSVDataProvider(csv_path)
     return DataHelperService(provider)
 
+
 if __name__ == "__main__":
     logging.basicConfig(
         level=logging.DEBUG,
         format="[%(asctime)s %(levelname)s:%(name)s:%(message)s]",
-        handlers=[logging.StreamHandler()]
+        handlers=[logging.StreamHandler(sys.stdout)]
     )
 
     service = create_data_helper_service()

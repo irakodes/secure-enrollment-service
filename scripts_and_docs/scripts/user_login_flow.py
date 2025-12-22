@@ -19,6 +19,7 @@ from google.protobuf.message import DecodeError
 from client.enrollmentProto_pb2 import CreateUserRequest, CreateUserResponse
 from client.common_pb2 import SignedResponse
 from client.errorResponse_pb2 import ErrorResponse
+from data_helper import create_data_helper_service
 
 BASE_URL = "http://127.0.0.1:8443"
 CREATE_USER_ENDPOINT = "api/users"
@@ -111,7 +112,7 @@ def parse_create_user_response(payload: bytes) -> CreateUserResponse:
 def try_parse_success(payload: bytes) -> Optional[CreateUserResponse]:
     response = CreateUserResponse()
     try:
-        response.parseFromString(payload)
+        response.ParseFromString(payload)
         return response
     except DecodeError:
         return None
@@ -129,8 +130,12 @@ def main() -> None:
     log.info("[STEP 1] -- Creating A User")
 
     # Step 1: Input (To Configure Later)
-    name = "John Doe"
-    email = "john.doe@example.com"
+    # --- Using A Random Test User ---
+    data_service = create_data_helper_service()
+    random_user = data_service.get_random_user()
+
+    name = random_user['Names']
+    email = random_user['Email']
 
     request_bytes = build_create_user_request(name, email)
     raw_response = send_request(request_bytes)
