@@ -107,3 +107,95 @@ class CSVDataProvider(DataProvider):
     def get_record_count(self) -> int:
         """Get total number of records."""
         return len(self.records)
+
+class DataHelperService:
+    """
+    Service layer for dat operations.
+    Uses dependency injection to work with any DataProvider implementation.
+    """
+
+    def __init__(self, provider: DataProvider):
+        """
+        Initialize service with a data provider.
+
+        Args:
+            provider: Implementation of DataProvider interface.
+        """
+        self.provider = provider
+        log.debug("DataHelperService initialized with provider: %s",
+                  type(provider).__name__)
+
+    def get_random_user(self) -> Optional[Dict[str, str]]:
+        """
+        Get a random user profile record from the data source.
+
+        Returns:
+            Dictionary with user data or None if no records available.
+        """
+        record = self.provider.get_random_record()
+
+        if record:
+            log.debug("Retrieved random user: %s [Email: %s]",
+                      record.get('Names'), record.get('Email'))
+        else:
+            log.warning("No user records available.")
+
+        return record
+
+    def get_random_admin(self) -> Optional[Dict[str, str]]:
+        """
+        Get a random admin profile record from the data source.
+
+        Returns:
+            Dictionary with admin data or None if no records available.
+        """
+        all_records = self.provider.get_all_records()
+        admins = [r for r in all_records if r.get('App_Role') == 'ROLE_ADMIN']
+
+        if not admins:
+            log.warning("No admin records found")
+            return None
+
+        admin = choice(admins)
+        log.debug("Retrieved random admin: %s", admin.get('Names'))
+        return admin
+
+    def get_random_reviewer(self) -> Optional[Dict[str, str]]:
+        """
+        Get a random reviewer profile from the available records.
+
+        Returns:
+            A Dictionary with the reviewer data or None if no available reviewer records are left.
+        """
+        all_records = self.provider.get_all_records()
+        reviewers = [r for r in all_records if r.get('App_Role') == 'ROLE_REVIEWER']
+
+        if not reviewers:
+            log.warning("No viewer records were found")
+            return None
+
+        reviewer = choice(reviewers)
+        return reviewer
+
+    def get_random_by_role(self, role: str) -> Optional[Dict[str, str]]:
+        """
+        Get a random user profile record based on the specified role.
+        Args:
+            role: Role to filter by.
+        Returns:
+            Dictionary with user data or None if no records available.
+        """
+        all_records = self.provider.get_all_records()
+        log.info("Selecting random user with role: %s", role)
+        users_with_role = [r for r in all_records if r.get('App_Role') == role]
+
+        if not users_with_role:
+            log.warning("The application could not find any users with the role %s", role)
+            return None
+
+        random_user = choice(users_with_role)
+        return random_user
+
+    def get_record_count(self) -> int:
+        """Get total number of records in the data source."""
+        return self.provider.get_record_count()
