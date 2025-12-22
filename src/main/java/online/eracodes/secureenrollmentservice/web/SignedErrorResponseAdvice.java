@@ -22,6 +22,13 @@ public class SignedErrorResponseAdvice {
     private final static Logger log = LoggerFactory.getLogger(SignedErrorResponseAdvice.class);
     private final SignedResponseFactory responseFactory;
 
+    /**
+     * Handle enrollment service exceptions and return a signed error response.
+     *
+     * @param ex      The enrollment service exception.
+     * @param request The HTTP servlet request.
+     * @return A ResponseEntity containing the signed error response.
+     */
     @ExceptionHandler(EnrollmentServiceException.class)
     public ResponseEntity<Message> handleEnrollmentServiceException(
             EnrollmentServiceException ex,
@@ -38,6 +45,13 @@ public class SignedErrorResponseAdvice {
                 .body(responseFactory.wrap(response));
     }
 
+    /**
+     * Handle unexpected exceptions and return a signed error response with a 500 status.
+     *
+     * @param ex      The unexpected exception.
+     * @param request The HTTP servlet request.
+     * @return A ResponseEntity containing the signed error response with a 500 status.
+     */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Message> handleException(Exception ex, HttpServletRequest request) {
         var errorId = "SES_IRKDS" + UUID.randomUUID().toString()
