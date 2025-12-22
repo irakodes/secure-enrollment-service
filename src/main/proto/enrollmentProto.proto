@@ -40,12 +40,6 @@ message SignedResponse {
   bytes signature = 2;             // Dilithium signature of the serialized body
 }
 
-message ErrorResponse {
-  int32 errorCode = 1;
-  string errorMessage = 2;
-  string timestamp = 3;
-}
-
 message AdminLoginRequest {
   string username = 1;
   string password = 2;
