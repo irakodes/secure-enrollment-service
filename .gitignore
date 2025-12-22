@@ -49,3 +49,29 @@ out/
 data/keys/
 *.key
 /data/
+
+### Logs and Databases ###
+*.log
+*.sql
+*.sqlite
+*.db
+*.db-journal
+
+### Temporary Files ###
+*.tmp
+*.temp
+*.swp
+*~.bak
+*.backup
+*.old
+*.orig
+*.rej
+
+### Datasets & CSVs ###
+data/datasets/
+data/csv/
+data/json/
+data/xml/
+data/excel/
+*.csv
+*.csv(Downloaded)
