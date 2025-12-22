@@ -199,3 +199,43 @@ class DataHelperService:
     def get_record_count(self) -> int:
         """Get total number of records in the data source."""
         return self.provider.get_record_count()
+
+def create_data_helper_service(csv_path: Optional[Path] = None) -> DataHelperService:
+    """
+    Factory method to create a DataHelperService instance.
+
+    Args:
+        csv_path: Path to the CSV file. Defaults to ../dataset.csv
+
+    Returns:
+        An instance of DataHelperService
+
+    Raises:
+        FileNotFoundError: If dataset file is not found.
+        ValueError: If the CSV dataset is empty or malformed.
+    """
+    if csv_path is None:
+        # Default: Look for dataset.csv one level up from this file
+        csv_path = Path(__file__).parent.parent / "dataset.csv"
+
+    log.info("Creating DataHelperService with CSV: %s", csv_path)
+
+    provider = CSVDataProvider(csv_path)
+    return DataHelperService(provider)
+
+if __name__ == "__main__":
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format="[%(asctime)s %(levelname)s:%(name)s:%(message)s]",
+        handlers=[logging.StreamHandler()]
+    )
+
+    service = create_data_helper_service()
+    log.info("Total records: %d", service.get_record_count())
+
+    random_user = service.get_random_user()
+    if random_user:
+        print("\nRandom User:")
+        print(f"    Name: {random_user['Names']}")
+        print(f"    Email: {random_user['Email']}")
+        print(f"    Role: {random_user['App_Role']}")
