@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+option java_package = "online.eracodes.protobuf.web";
+option java_outer_classname = "SignedResponseProto";
+
+message SignedResponse {
+    bytes payload = 1;
+    bytes signature = 2;
+}

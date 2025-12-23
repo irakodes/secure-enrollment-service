@@ -12,7 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
 import com.google.protobuf.Message;
@@ -21,9 +21,9 @@ import lombok.RequiredArgsConstructor;
 import online.eracodes.secureenrollmentservice.protobuf.SignedResponseFactory;
 
 @Slf4j
-@ControllerAdvice
+@RestControllerAdvice
 @RequiredArgsConstructor
-public class SigningResponseAdvice implements ResponseBodyAdvice<Message> {
+public class SignedResponseAdvice implements ResponseBodyAdvice<Message> {
 
     private final SignedResponseFactory factory;
 

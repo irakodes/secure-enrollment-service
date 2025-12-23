@@ -61,7 +61,7 @@ public class DilithiumSigner {
             // Generate signature
             byte[] signatureBytes = signature.sign();
             
-            log.debug("Message signed successfully. Signature length: {} bytes", signatureBytes.length);
+            log.debug("Message signed with {}", signature.getAlgorithm());
             return signatureBytes;
             
         } catch (NoSuchAlgorithmException e) {
