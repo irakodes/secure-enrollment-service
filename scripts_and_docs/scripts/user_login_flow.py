@@ -124,14 +124,19 @@ def try_parse_success(payload: bytes) -> Optional[CreateUserResponse]:
         return None
 
 
-def try_parse_error(payload: bytes) -> Optional[ErrorResponse]:
-    error = ErrorResponse()
+def try_parse_error(payload: Optional[bytes]) -> Optional[ErrorResponse]:
     if not payload:
         return None
+
+    error = ErrorResponse()
     try:
         error.ParseFromString(payload)
+
+        log.info(f"Error Response Received: {error}")
         return error
-    except DecodeError:
+    except DecodeError as exc:
+        log.error("Something went south when decoding [ErrorResponse]: %s",
+                  exc.__cause__, exc_info=True)
         return None
 
 
@@ -149,41 +154,47 @@ def main() -> None:
 
     request_bytes = build_create_user_request(name, email)
 
-    payload = None
-    success = None
-
-    call_success = False
+    raw_response = None
 
     try:
-        raw_response, call_success = send_request(request_bytes)
+        raw_response, http_success = send_request(request_bytes)
         payload, signature = parse_signed_response(raw_response)
+
         log.debug("Dilithium Signature Hex: %s", signature.hex())
 
-        success = try_parse_success(payload)
     except RuntimeError as e:
-        log.error("Error occurred during enrollment flow: %s", e, exc_info=True)
-
+        log.error("Request failed (network/timeout): %s", e)
+        return
+    except DecodeError as e:
+        log.error("Response is not a valid SignedResponse: %s", e)
+        log.error("Raw response (hex): %s", raw_response.hex())
+        try:
+            log.error("Raw response (text): %s", raw_response.decode('utf-8', errors='replace'))
+        except:
+            pass
+        raise RuntimeError("Invalid signed response format")
     except Exception as e:
-        log.error("Error occurred during enrollment flow: %s", e, exc_info=True)
+        log.error("Unexpected error: %s", e, exc_info=True)
+        return
 
-    # create_user_response = parse_create_user_response(payload)
-    # --- Attempting to parse the success response first ---
-    if call_success:
-        if success:
+    if payload is not None:
+        success = try_parse_success(payload)
+        # --- Attempting to parse the success response first ---
+        if success and http_success:
             log.info("User Created Successfully")
             log.info("User ID: %s", success.userId)
             return
 
-    error = try_parse_error(payload)
-    if error:
-        log.error("Service error occurred")
-        log.error("Error ID   : %s", error.error_id)
-        log.error("Error Code : %s", error.error_code)
-        log.error("Message    : %s", error.message)
-        log.error("Path       : %s", error.path)
-        return
+        error = try_parse_error(payload)
+        if error:
+            log.error("Service error occurred")
+            log.error("Error ID   : %s", error.error_id)
+            log.error("Error Code : %s", error.error_code)
+            log.error("Message    : %s", error.message)
+            log.error("Path       : %s", error.path)
+            return
 
-    # ---- Unknown payload
+    # ---- Something went wrong if I am here Unknown payload
     log.critical("Unknown payload type received")
     raise RuntimeError("Unrecognized payload in SignedResponse")
 
