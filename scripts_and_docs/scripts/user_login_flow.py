@@ -20,16 +20,9 @@ from client.enrollmentProto_pb2 import CreateUserRequest, CreateUserResponse
 from client.common_pb2 import SignedResponse
 from client.errorResponse_pb2 import ErrorResponse
 from data_helper import create_data_helper_service
+from config import BASE_URL, HEADERS, TIMEOUT_IN_SECONDS
 
-BASE_URL = "http://127.0.0.1:8443"
 CREATE_USER_ENDPOINT = "api/users"
-
-HEADERS = {
-    "Content-Type": "application/octet-stream",
-    "Accept": "application/octet-stream"
-}
-
-TIMEOUT_IN_SECONDS = 10
 
 
 def setup_logging() -> None:
