@@ -37,8 +37,6 @@ public class SignedResponseFactory {
             return null;
         }
 
-        log.debug("Message: {}", body);
-
         try {
             log.info("Wrapping response with Dilithium signature");
             var bodyBytes = body.toByteArray();

@@ -75,3 +75,6 @@ data/xml/
 data/excel/
 *.csv
 *.csv(Downloaded)
+
+# For python scripts
+__pycache__/

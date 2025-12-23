@@ -135,7 +135,7 @@ def main() -> None:
     random_user = data_service.get_random_user()
 
     name = random_user['Names']
-    email = random_user['Email']
+    email = "john.doe@example.com"#random_user['Email']
 
     request_bytes = build_create_user_request(name, email)
     raw_response = send_request(request_bytes)
