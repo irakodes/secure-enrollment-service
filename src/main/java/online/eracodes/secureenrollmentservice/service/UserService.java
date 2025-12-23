@@ -12,6 +12,7 @@ import online.eracodes.secureenrollmentservice.repository.UserRepository;
 import online.eracodes.secureenrollmentservice.security.RegistrationAuthnProvider;
 import online.eracodes.secureenrollmentservice.security.RegistrationAuthnToken;
 import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -54,11 +55,10 @@ public class UserService implements IUserService {
                     +-----------------------------------------+
                     """, System.lineSeparator(), userCode);
             return response;
-        } catch (ConstraintViolationException e) {
-            log.error("Failed to create user", e);
-            throw new DuplicateEmailException("Email already registered");
-        }
-        catch (Exception e) {
+        } catch (ConstraintViolationException | DataIntegrityViolationException e) {
+            log.error("Failed to create user: {}", e.getMessage());
+            throw new DuplicateEmailException(request.getEmail());
+        } catch (Exception e) {
             log.error("Unexpected error occurred while creating user", e);
             throw e;
         }

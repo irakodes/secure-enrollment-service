@@ -43,7 +43,7 @@ public class SignedResponseFactory {
 
             // Signing the serialized message body using Dilithium
             var signature = signer.sign(bodyBytes);
-            log.debug("Message signed successfully. Signature length: {} bytes", signature.length);
+            log.debug("Wrapping Message - Signature Length: {} bytes", signature.length);
 
             return EnrollmentProto.SignedResponse.newBuilder()
                     .setBody(ByteString.copyFrom(bodyBytes))

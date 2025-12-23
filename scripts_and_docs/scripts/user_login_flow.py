@@ -57,7 +57,7 @@ def build_create_user_request(username: str, email: str) -> bytes:
     return data
 
 
-def send_request(binary_data: bytes) -> bytes:
+def send_request(binary_data: bytes) -> Tuple[bytes, bool]:
     url = f"{BASE_URL}/{CREATE_USER_ENDPOINT}"
     log.info("POST %s", url)
 
@@ -72,14 +72,18 @@ def send_request(binary_data: bytes) -> bytes:
     log.info("HTTP %s", response.status_code)
 
     if response.status_code not in (200, 201):
-        raise RuntimeError(f"Unexpected response status: {response.status_code}")
+        #raise RuntimeError(f"Unexpected response status: {response.status_code}")
+        log.warning("The request was not successful. Response was: %s",
+                    response.status_code)
+        if not response.content:
+            raise RuntimeError("Empty response content")
+        return response.content, False
 
     if not response.content:
         raise RuntimeError("Empty response content")
 
     log.debug("Received response (%d bytes)", len(response.content))
-    return response.content
-
+    return response.content, True
 
 def parse_signed_response(raw: bytes) -> Tuple[bytes, bytes]:
     log.debug("Parsing SignedResponse protobuf")
@@ -98,6 +102,7 @@ def parse_signed_response(raw: bytes) -> Tuple[bytes, bytes]:
 
     return signed.payload, signed.signature
 
+
 def parse_create_user_response(payload: bytes) -> CreateUserResponse:
     response = CreateUserResponse()
 
@@ -109,6 +114,7 @@ def parse_create_user_response(payload: bytes) -> CreateUserResponse:
 
     return response
 
+
 def try_parse_success(payload: bytes) -> Optional[CreateUserResponse]:
     response = CreateUserResponse()
     try:
@@ -117,13 +123,17 @@ def try_parse_success(payload: bytes) -> Optional[CreateUserResponse]:
     except DecodeError:
         return None
 
+
 def try_parse_error(payload: bytes) -> Optional[ErrorResponse]:
     error = ErrorResponse()
+    if not payload:
+        return None
     try:
-        error.parseFromString(payload)
+        error.ParseFromString(payload)
         return error
     except DecodeError:
         return None
+
 
 def main() -> None:
     setup_logging()
@@ -135,27 +145,40 @@ def main() -> None:
     random_user = data_service.get_random_user()
 
     name = random_user['Names']
-    email = "john.doe@example.com"#random_user['Email']
+    email = random_user['Email']
 
     request_bytes = build_create_user_request(name, email)
-    raw_response = send_request(request_bytes)
 
-    payload, signature = parse_signed_response(raw_response)
-    log.debug("Dilithium Signature Hex: %s", signature.hex())
+    payload = None
+    success = None
 
-    #create_user_response = parse_create_user_response(payload)
+    call_success = False
+
+    try:
+        raw_response, call_success = send_request(request_bytes)
+        payload, signature = parse_signed_response(raw_response)
+        log.debug("Dilithium Signature Hex: %s", signature.hex())
+
+        success = try_parse_success(payload)
+    except RuntimeError as e:
+        log.error("Error occurred during enrollment flow: %s", e, exc_info=True)
+
+    except Exception as e:
+        log.error("Error occurred during enrollment flow: %s", e, exc_info=True)
+
+    # create_user_response = parse_create_user_response(payload)
     # --- Attempting to parse the success response first ---
-    success = try_parse_success(payload)
-    if success:
-        log.info("User Created Successfully")
-        log.info("User ID: %s", success.userId)
-        return
+    if call_success:
+        if success:
+            log.info("User Created Successfully")
+            log.info("User ID: %s", success.userId)
+            return
 
     error = try_parse_error(payload)
     if error:
         log.error("Service error occurred")
-        log.error("Error ID   : %s", error.errorId)
-        log.error("Error Code : %s", error.errorCode)
+        log.error("Error ID   : %s", error.error_id)
+        log.error("Error Code : %s", error.error_code)
         log.error("Message    : %s", error.message)
         log.error("Path       : %s", error.path)
         return
@@ -163,6 +186,7 @@ def main() -> None:
     # ---- Unknown payload
     log.critical("Unknown payload type received")
     raise RuntimeError("Unrecognized payload in SignedResponse")
+
 
 if __name__ == "__main__":
     main()
