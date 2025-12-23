@@ -38,6 +38,13 @@ public class SignedResponseAdvice implements ResponseBodyAdvice<Message> {
             MethodParameter returnType,
             @NonNull Class<? extends HttpMessageConverter<?>> converterType) {
 
+        // Excluding the public key endpoint from signing
+        // See issue https://linear.app/iracodes/issue/IRA-142/pinned-root-public-key-trust-anchor
+        if (returnType.hasMethodAnnotation(ExcludeFromSigning.class)) {
+            log.debug("Endpoint marked with @ExcludeFromSigning, skipping response signing");
+            return false;
+        }
+
         var bodyType = returnType.getParameterType();
         log.debug("Response Body Type: {}", bodyType.getSimpleName());
 
