@@ -4,20 +4,18 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import online.eracodes.protobuf.enrollment.EnrollmentProto;
 import online.eracodes.protobuf.login.LoginProto;
-import online.eracodes.secureenrollmentservice.crypto.DilithiumKeyService;
 import online.eracodes.secureenrollmentservice.entity.AppUser;
 import online.eracodes.secureenrollmentservice.entity.User;
+import online.eracodes.secureenrollmentservice.exceptions.DuplicateEmailException;
+import online.eracodes.secureenrollmentservice.exceptions.InvalidEmailException;
 import online.eracodes.secureenrollmentservice.repository.UserRepository;
 import online.eracodes.secureenrollmentservice.security.RegistrationAuthnProvider;
 import online.eracodes.secureenrollmentservice.security.RegistrationAuthnToken;
-import org.bouncycastle.pqc.jcajce.spec.DilithiumParameterSpec;
+import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-
-import java.io.IOException;
-import java.security.GeneralSecurityException;
-import java.security.PublicKey;
 
 
 import static online.eracodes.secureenrollmentservice.util.StringsUtil.getRegistrationCode;
@@ -31,33 +29,39 @@ public class UserService implements IUserService {
     private final PasswordEncoder pwdEncoder;
     private final UserRepository userRepository;
     private final RegistrationAuthnProvider regAuthnProvider;
-    private final DilithiumKeyService dilithiumKeyService;
 
     @Override
     public EnrollmentProto.CreateUserResponse createUser(EnrollmentProto.CreateUserRequest request) {
         log.debug("Incoming user creation request: {}", request);
         if (!isEmailValid(request.getEmail())) {
-            // Introduce a wrapper to fit the application's requirement
-            throw new IllegalArgumentException("Invalid email address");
+            throw new InvalidEmailException("Invalid email address");
         }
         var userCode = getRegistrationCode(request.getEmail());
         var user = mapRequestToUser(request, userCode);
 
-        user = userRepository.save(user);
+        try {
+            user = userRepository.save(user);
 
-        var response = EnrollmentProto.CreateUserResponse.newBuilder()
-                .setRegistrationCode(userCode)
-                .setUserId(String.valueOf(user.getId()))
-                .setMessage("User created successfully")
-                .build();
+            var response = EnrollmentProto.CreateUserResponse.newBuilder()
+                    .setRegistrationCode(userCode)
+                    .setUserId(String.valueOf(user.getId()))
+                    .setMessage("User created successfully")
+                    .build();
 
-        log.info("User {} registration code generated", user.getEmail());
-        log.info("""
-                {}+-----------------------------------------+
-                | CODE: {}              |
-                +-----------------------------------------+
-                """, System.lineSeparator(), userCode);
-        return response;
+            log.info("User {} registration code generated", user.getEmail());
+            log.info("""
+                    {}+-----------------------------------------+
+                    | CODE: {}              |
+                    +-----------------------------------------+
+                    """, System.lineSeparator(), userCode);
+            return response;
+        } catch (ConstraintViolationException | DataIntegrityViolationException e) {
+            log.error("Failed to create user: {}", e.getMessage());
+            throw new DuplicateEmailException(request.getEmail());
+        } catch (Exception e) {
+            log.error("Unexpected error occurred while creating user", e);
+            throw e;
+        }
     }
 
     @Override

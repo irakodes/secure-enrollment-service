@@ -3,6 +3,9 @@ package online.eracodes.secureenrollmentservice.security;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import online.eracodes.secureenrollmentservice.entity.AppUser;
+import online.eracodes.secureenrollmentservice.exceptions.RegistrationCodeInvalidException;
+import online.eracodes.secureenrollmentservice.exceptions.RegistrationException;
+import online.eracodes.secureenrollmentservice.exceptions.UserNotFoundException;
 import online.eracodes.secureenrollmentservice.repository.UserRepository;
 import online.eracodes.secureenrollmentservice.util.StringsUtil;
 import org.jspecify.annotations.NonNull;
@@ -33,7 +36,7 @@ public class RegistrationAuthnProvider
         var email = (String) authn.getPrincipal();
         var fullCode = (String) authn.getCredentials();
 
-        if (fullCode == null) throw new IllegalArgumentException("Registration code cannot be null");
+        if (fullCode == null) throw new RegistrationCodeInvalidException("Registration code cannot be null");
 
         if (!isRegistrationCodeVerified(fullCode)) {
             throw new BadCredentialsException("Checksum failed");
@@ -41,8 +44,10 @@ public class RegistrationAuthnProvider
 
         log.info("Checksum validation successful");
         log.info("DB Check for user: {}", email);
+
         var user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new BadCredentialsException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+
         log.debug("User: {}", user);
         log.trace("Pass code: {}", user.getRegistrationCode());
 
@@ -50,7 +55,7 @@ public class RegistrationAuthnProvider
 
         // Check if user is already registered
         if (user.isRegistered()) {
-            throw new BadCredentialsException("User already registered");
+            throw new RegistrationException(RegistrationException.USER_ALREADY_REGISTERED);
         }
 
         var registrationCode = fullCode.substring(0, 16);
