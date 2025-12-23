@@ -3,6 +3,7 @@
 import logging
 
 import requests
+
 from pqcrypto.sign.dilithium2 import verify
 
 from config import BASE_URL, TIMEOUT_IN_SECONDS
@@ -40,3 +41,24 @@ def fetch_dilithium_public_key() -> bytes:
     log.info("Dilithium public key fetched (%d bytes)", len(response.content))
     #return bytes.fromhex(response.content.decode())
     return response.content
+
+def verify_signed_payload(
+    payload: bytes,
+    signature: bytes,
+    public_key: bytes
+) -> None:
+    """
+    Verifies Dilithium2 signature on the payload.
+    Raises an exception if verification fails.
+    """
+
+    log.debug("Verifying Dilithium2 Signature")
+
+    try:
+        verify(payload, signature, public_key)
+        log.info("Dilithium2 Signature Verified")
+    except Exception as e:
+        log.critical("INVALID SIGNATURE - Response rejected", exc_info=True)
+        raise RuntimeError("Failed to verify signature") from e
+
+    log.debug("Dilithium2 signature verification successful")
