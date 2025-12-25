@@ -1,18 +1,23 @@
 #!/usr/bin/env python3
 
 import logging
+from typing import Optional
 
 import requests
+from google.protobuf.message import DecodeError
 
-from pqcrypto.sign.dilithium2 import verify
+from dilithium.dilithium import Dilithium2
 
 from config import BASE_URL, TIMEOUT_IN_SECONDS
 from scripts.config import HEADERS
 
+from client.enrollmentProto_pb2 import PublicKeyResponse
+from scripts.string_utils import xxd
+
 log = logging.getLogger(__name__)
 
 
-def fetch_dilithium_public_key() -> bytes:
+def fetch_dilithium_public_key() -> Optional[PublicKeyResponse]:
     """
     Fetches the Dilithium2 public key from the server.
     """
@@ -39,13 +44,16 @@ def fetch_dilithium_public_key() -> bytes:
         raise RuntimeError("Empty public key response received")
 
     log.info("Dilithium public key fetched (%d bytes)", len(response.content))
-    #return bytes.fromhex(response.content.decode())
-    return response.content
+    # return bytes.fromhex(response.content.decode())
+    pk_response = try_parse_success(response.content)
+
+    return pk_response
+
 
 def verify_signed_payload(
-    payload: bytes,
-    signature: bytes,
-    public_key: bytes
+        payload: bytes,
+        signature: bytes,
+        public_key: bytes
 ) -> None:
     """
     Verifies Dilithium2 signature on the payload.
@@ -55,10 +63,22 @@ def verify_signed_payload(
     log.debug("Verifying Dilithium2 Signature")
 
     try:
-        verify(payload, signature, public_key)
-        log.info("Dilithium2 Signature Verified")
+        verified = Dilithium2.verify(public_key, payload, signature)
+        log.debug(f"Verification was: {verified}")
+        if verified:
+            log.info("Dilithium2 Signature Verified")
+        else:
+            raise RuntimeError("Signature verification failed")
     except Exception as e:
         log.critical("INVALID SIGNATURE - Response rejected", exc_info=True)
         raise RuntimeError("Failed to verify signature") from e
 
     log.debug("Dilithium2 signature verification successful")
+
+def try_parse_success(payload: bytes) -> Optional[PublicKeyResponse]:
+    response = PublicKeyResponse()
+    try:
+        response.ParseFromString(payload)
+        return response
+    except DecodeError:
+        return None

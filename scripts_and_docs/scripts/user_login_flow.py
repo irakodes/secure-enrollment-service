@@ -21,6 +21,7 @@ from client.common_pb2 import SignedResponse
 from client.errorResponse_pb2 import ErrorResponse
 from data_helper import create_data_helper_service
 from config import BASE_URL, HEADERS, TIMEOUT_IN_SECONDS
+from signature_handler import fetch_dilithium_public_key, verify_signed_payload
 
 CREATE_USER_ENDPOINT = "api/users"
 
@@ -137,6 +138,8 @@ def main() -> None:
     setup_logging()
     log.info("[STEP 1] -- Creating A User")
 
+    pk = fetch_dilithium_public_key()
+
     # Step 1: Input (To Configure Later)
     # --- Using A Random Test User ---
     data_service = create_data_helper_service()
@@ -152,6 +155,14 @@ def main() -> None:
     try:
         raw_response, http_success = send_request(request_bytes)
         payload, signature = parse_signed_response(raw_response)
+
+        log.info(f"Payload: {payload}")
+
+        try:
+            verify_signed_payload(payload, signature, pk.dilithiumPublicKey)
+            log.info("Signature Verified Successfully")
+        except Exception as e:
+            log.error("Signature Verification Failed: %s", e, exc_info=True)
 
         log.debug("Dilithium Signature Hex: %s", signature.hex())
 
